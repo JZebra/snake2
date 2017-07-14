@@ -14,7 +14,7 @@ function initGame(ctx, canv) {
     vy = 0;
     xmax = canv.width;
     ymax = canv.height;
-
+    food = null;
 }
 
 function keyPush(event) {
@@ -49,6 +49,8 @@ function keyPush(event) {
 
 function tick(ctx, canv) {
     console.log(`px: ${px}, py: ${py}`)
+
+    // update snake pos
     px = px += vx;
     py = py += vy;
     if (px > xmax) {
@@ -64,11 +66,35 @@ function tick(ctx, canv) {
         py = ymax;
     }
 
+    // update food pos
+    makeFood(ctx, canv)
+
+    // draw board
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canv.width, canv.height)
 
+    // draw snake
+    const snakesize = 10;
     ctx.fillStyle = "white";
-    ctx.fillRect(px, py, 10, 10)
+    ctx.fillRect(px, py, snakesize, snakesize)
+
+    // draw food
+    const foodsize = 10;
+    ctx.fillStyle = "red";
+    ctx.fillRect(food['x'], food['y'], foodsize, foodsize)
+
+}
+
+function makeFood(ctx, canv) {
+    if (!food) {
+        console.log('creating food')
+        let randx = Math.round(Math.random() * canv.width)
+        let randy = Math.round(Math.random() * canv.height)
+        food = {
+            'x': randx,
+            'y': randy,
+        }
+    }
 }
 
 
