@@ -3,7 +3,7 @@ window.onload = function(){
     var ctx = canv.getContext("2d");
     document.addEventListener("keydown", keyPush);
     initGame(ctx, canv)
-    var framerate = 1000/60 // 66.67 fps
+    var framerate = 1000/60 // 60 fps
     setInterval(function() {tick(ctx, canv)}, framerate)
 }
 
@@ -25,16 +25,24 @@ function keyPush(event) {
     // d == 68
     switch(event.keyCode) {
         case 83:
-            vx = 0; vy = 1;
+            if (vy != -1) {
+                vx = 0; vy = 1;
+            }
             break;
         case 65:
-            vx = -1; vy = 0;
+            if (vx != 1) {
+                vx = -1; vy = 0;
+            }
             break;
         case 87:
-            vx = 0; vy = -1;
+            if (vy != 1) {
+                vx = 0; vy = -1;
+            }
             break;
         case 68:
-            vx = 1; vy = 0;
+            if (vx != -1) {
+                vx = 1; vy = 0;
+            }
             break;
     }
 }
