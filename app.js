@@ -3,7 +3,7 @@ window.onload = function(){
     var ctx = canv.getContext("2d");
     document.addEventListener("keydown", keyPush);
     initGame(ctx, canv)
-    var framerate = 1000/60 // 60 fps
+    var framerate = 1000/15 // 15 fps
     setInterval(function() {tick(ctx, canv)}, framerate)
 }
 
@@ -12,8 +12,9 @@ function initGame(ctx, canv) {
     py = 10;
     vx = 0;
     vy = 0;
-    xmax = canv.width;
-    ymax = canv.height;
+    stepsize = 10;
+    xmax = canv.width - stepsize;
+    ymax = canv.height - stepsize;
     food = null;
 }
 
@@ -51,8 +52,8 @@ function tick(ctx, canv) {
     console.log(`px: ${px}, py: ${py}`)
 
     // update snake pos
-    px = px += vx;
-    py = py += vy;
+    px = px += vx * stepsize;
+    py = py += vy * stepsize;
     if (px > xmax) {
         px = 0;
     }
@@ -87,14 +88,16 @@ function tick(ctx, canv) {
 
 function makeFood(ctx, canv) {
     if (!food) {
-        console.log('creating food')
-        let randx = Math.round(Math.random() * canv.width)
-        let randy = Math.round(Math.random() * canv.height)
+        // round to the nearest multiple of stepsize
+        let randx = Math.floor(Math.random() * canv.width / stepsize) * stepsize;
+        let randy = Math.floor(Math.random() * canv.height / stepsize) * stepsize;
         food = {
             'x': randx,
             'y': randy,
         }
     }
 }
+
+
 
 
