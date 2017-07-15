@@ -8,10 +8,12 @@ window.onload = function(){
 }
 
 function initGame(ctx, canv) {
-    px = 10;
-    py = 10;
-    vx = 0;
-    vy = 0;
+    snake = {
+        'px': 10,
+        'py': 10,
+        'vx': 0,
+        'vy': 0
+    }
     stepsize = 10;
     xmax = canv.width - stepsize;
     ymax = canv.height - stepsize;
@@ -26,49 +28,32 @@ function keyPush(event) {
     // d == 68
     switch(event.keyCode) {
         case 83:
-            if (vy != -1) {
-                vx = 0; vy = 1;
+            if (snake['vy'] != -1) {
+                snake['vx'] = 0; snake['vy'] = 1;
             }
             break;
         case 65:
-            if (vx != 1) {
-                vx = -1; vy = 0;
+            if (snake['vx'] != 1) {
+                snake['vx'] = -1; snake['vy'] = 0;
             }
             break;
         case 87:
-            if (vy != 1) {
-                vx = 0; vy = -1;
+            if (snake['vy'] != 1) {
+                snake['vx'] = 0; snake['vy'] = -1;
             }
             break;
         case 68:
-            if (vx != -1) {
-                vx = 1; vy = 0;
+            if (snake['vx'] != -1) {
+                snake['vx'] = 1; snake['vy'] = 0;
             }
             break;
     }
 }
 
 function tick(ctx, canv) {
-    console.log(`px: ${px}, py: ${py}`)
-
-    // update snake pos
-    px = px += vx * stepsize;
-    py = py += vy * stepsize;
-    if (px > xmax) {
-        px = 0;
-    }
-    if (py > ymax) {
-        py = 0;
-    }
-    if (px < 0) {
-        px = xmax;
-    }
-    if (py < 0) {
-        py = ymax;
-    }
-
-    // update food pos
+    // update positions
     makeFood(ctx, canv)
+    updateSnake(ctx, canv)
 
     // draw board
     ctx.fillStyle = "black";
@@ -77,13 +62,29 @@ function tick(ctx, canv) {
     // draw snake
     const snakesize = 10;
     ctx.fillStyle = "white";
-    ctx.fillRect(px, py, snakesize, snakesize)
+    ctx.fillRect(snake['px'], snake['py'], snakesize, snakesize)
 
     // draw food
     const foodsize = 10;
     ctx.fillStyle = "red";
     ctx.fillRect(food['x'], food['y'], foodsize, foodsize)
+}
 
+function updateSnake(ctx, canv) {
+    snake['px'] = snake['px'] += snake['vx'] * stepsize;
+    snake['py'] = snake['py'] += snake['vy'] * stepsize;
+    if (snake['px'] > xmax) {
+        snake['px'] = 0;
+    }
+    if (snake['py'] > ymax) {
+        snake['py'] = 0;
+    }
+    if (snake['px'] < 0) {
+        snake['px'] = xmax;
+    }
+    if (snake['py'] < 0) {
+        snake['py'] = ymax;
+    }
 }
 
 function makeFood(ctx, canv) {
@@ -97,6 +98,7 @@ function makeFood(ctx, canv) {
         }
     }
 }
+
 
 
 
