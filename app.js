@@ -10,31 +10,65 @@ window.onload = function(){
 function Snake(px, py, vx, vy, stepsize) {
     this.vx = vx;
     this.vy = vy;
-    this.head = {
+    var head = {
         'px': px,
         'py': py
     };
     this.stepsize = stepsize;
-    this.segments = [this.head];
-    this.updatePosition = function() {
-        for (var i = 0; i < this.segments.length; i++) {
-            var segment = this.segments[i];
-            segment.px = segment.px += this.vx * this.stepsize;
-            segment.py = segment.py += this.vy * this.stepsize;
-            if (segment.px > xmax) {
-                segment.px = 0;
-            }
-            if (segment.py > ymax) {
-                segment.py = 0;
-            }
-            if (segment.px < 0) {
-                segment.px = xmax;
-            }
-            if (segment.py < 0) {
-                segment.py = ymax;
-            }
-
+    this.segments = [head];
+    this.move = function(shouldGrow) {
+        if (shouldGrow) {
+            this.addSegment();
         }
+        this.moveBody();
+        this.moveHead();
+    }
+
+    // Returns true if the snake eats the food.
+    this.eat = function(food) {
+        var head = this.segments[0];
+        if (head.px == food.px && head.py == food.py) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    this.moveHead = function() {
+        var head = this.segments[0];
+        head.px = head.px += this.vx * this.stepsize;
+        head.py = head.py += this.vy * this.stepsize;
+        if (head.px > xmax) {
+            head.px = 0;
+        }
+        if (head.py > ymax) {
+            head.py = 0;
+        }
+        if (head.px < 0) {
+            head.px = xmax;
+        }
+        if (head.py < 0) {
+            head.py = ymax;
+        }
+    }
+
+    this.moveBody = function() {
+        if (this.segments.length == 1) {
+            return
+        }
+        // start at the last segment and move backwards
+        for (var i = this.segments.length - 1; i >= 1; i--) {
+            var nextSegment = this.segments[i-1];
+            this.segments[i].px = nextSegment.px;
+            this.segments[i].py = nextSegment.py;
+        }
+    }
+
+    this.addSegment = function() {
+        this.segments.push({
+            'px': null,
+            'py': null
+        });
     }
 }
 
@@ -44,6 +78,8 @@ function initGame(ctx, canv) {
     xmax = canv.width - stepsize;
     ymax = canv.height - stepsize;
     food = null;
+    shouldGrow = false;
+    makeFood(ctx, canv);
 }
 
 function keyPush(event) {
@@ -77,9 +113,18 @@ function keyPush(event) {
 }
 
 function tick(ctx, canv) {
+    // did snake eat?
+    if (snake.eat(food)) {
+        food = null;
+        shouldGrow = true;
+    }
+
     // update positions
-    makeFood(ctx, canv)
-    snake.updatePosition()
+    if (!food) {
+        makeFood(ctx, canv)
+    }
+    snake.move(shouldGrow)
+    shouldGrow = false;
 
     // draw board
     ctx.fillStyle = "black";
@@ -96,18 +141,17 @@ function tick(ctx, canv) {
     // draw food
     const foodsize = 10;
     ctx.fillStyle = "red";
-    ctx.fillRect(food['x'], food['y'], foodsize, foodsize)
+    ctx.fillRect(food['px'], food['py'], foodsize, foodsize)
 }
 
 function makeFood(ctx, canv) {
-    if (!food) {
-        // round to the nearest multiple of stepsize
-        let randx = Math.floor(Math.random() * canv.width / stepsize) * stepsize;
-        let randy = Math.floor(Math.random() * canv.height / stepsize) * stepsize;
-        food = {
-            'x': randx,
-            'y': randy,
-        }
+    // round to the nearest multiple of stepsize
+    let randx = Math.floor(Math.random() * canv.width / stepsize) * stepsize;
+    let randy = Math.floor(Math.random() * canv.height / stepsize) * stepsize;
+    food = {
+        'px': randx,
+        'py': randy,
     }
 }
+
 
