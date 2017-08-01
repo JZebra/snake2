@@ -70,6 +70,17 @@ function Snake(px, py, vx, vy, stepsize) {
             'py': null
         });
     }
+
+    this.collide = function() {
+        var head = this.segments[0];
+        for (var i = 1; i < this.segments.length; i++) {
+            var segment = this.segments[i];
+            if (head.px == segment.px && head.py == segment.py) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 function initGame(ctx, canv) {
@@ -113,6 +124,12 @@ function keyPush(event) {
 }
 
 function tick(ctx, canv) {
+    // game ending collision
+    if (snake.collide()) {
+        showGameOver();
+        return
+    }
+
     // did snake eat?
     if (snake.eat(food)) {
         food = null;
@@ -152,6 +169,10 @@ function makeFood(ctx, canv) {
         'px': randx,
         'py': randy,
     }
+}
+
+function showGameOver() {
+    alert('Game over')
 }
 
 
