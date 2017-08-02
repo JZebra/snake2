@@ -17,6 +17,7 @@ function Game(ctx, canv) {
         var ymax = this.canv.height - this.stepsize;
         this.snake = new Snake(10, 10, 1, 0, xmax, ymax, this.stepsize)
         this.food = this.makeFood();
+        this.score = 0;
         document.addEventListener("keydown", this.onKeyDown.bind(this));
     }
 
@@ -35,6 +36,7 @@ function Game(ctx, canv) {
 
         // did snake eat?
         if (this.snake.eat(this.food)) {
+            this.score += 1;
             this.food = null;
         }
 
@@ -96,6 +98,9 @@ function Game(ctx, canv) {
         const foodsize = 10;
         ctx.fillStyle = "red";
         ctx.fillRect(this.food['px'], this.food['py'], foodsize, foodsize)
+
+        // draw score
+        document.getElementById('score').innerHTML = this.score;
     }
 
     this.onKeyDown = function(event) {
