@@ -53,7 +53,43 @@ function Game(ctx, canv) {
         ctx.fillStyle = "white";
         for (var i = 0; i < this.snake.segments.length; i++) {
             var segment = this.snake.segments[i];
-            ctx.fillRect(segment['px'], segment['py'], snakesize, snakesize)
+            //draw triangle for head
+            if (i === 0) {
+                ctx.beginPath();
+                var startX, startY;
+                var originX = segment['px'];
+                var originY = segment['py'];
+                if (this.snake.vy === -1) {
+                    startX = originX + this.stepsize / 2;
+                    startY = originY;
+                    ctx.moveTo(startX, startY)
+                    ctx.lineTo(originX, originY + this.stepsize)
+                    ctx.lineTo(originX + this.stepsize, originY + this.stepsize)
+                } else if (this.snake.vx === -1) {
+                    startX = originX;
+                    startY = originY + this.stepsize / 2;
+                    ctx.moveTo(startX, startY)
+                    ctx.lineTo(originX + this.stepsize, originY)
+                    ctx.lineTo(originX + this.stepsize, originY + this.stepsize)
+                } else if (this.snake.vy === 1) {
+                    startX = originX + this.stepsize / 2;
+                    startY = originY + this.stepsize;
+                    ctx.moveTo(startX, startY)
+                    ctx.lineTo(originX, originY)
+                    ctx.lineTo(originX + this.stepsize, originY)
+                } else if (this.snake.vx === 1) {
+                    startX = originX + this.stepsize;
+                    startY = originY + this.stepsize / 2;
+                    ctx.moveTo(startX, startY)
+                    ctx.lineTo(originX, originY)
+                    ctx.lineTo(originX, originY + this.stepsize)
+                }
+                ctx.fill();
+
+            //draw rectangles for the body
+            } else {
+                ctx.fillRect(segment['px'], segment['py'], snakesize, snakesize)
+            }
         }
 
         // draw food
@@ -64,10 +100,10 @@ function Game(ctx, canv) {
 
     this.onKeyDown = function(event) {
         //Keyboard codes
-        // w == 87
-        // a == 65
-        // s == 83
-        // d == 68
+        // w === 87
+        // a === 65
+        // s === 83
+        // d === 68
         switch(event.keyCode) {
             case 83:
                 this.snake.controlUp();
@@ -130,7 +166,7 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     // Returns true if the snake eats the food.
     this.eat = function(food) {
         var head = this.segments[0];
-        if (head.px == food.px && head.py == food.py) {
+        if (head.px === food.px && head.py === food.py) {
             this.shouldGrow = true;
             return true;
         } else {
@@ -157,7 +193,7 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     }
 
     this.moveBody = function() {
-        if (this.segments.length == 1) {
+        if (this.segments.length === 1) {
             return
         }
         // start at the last segment and move backwards
@@ -180,7 +216,7 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
         var head = this.segments[0];
         for (var i = 1; i < this.segments.length; i++) {
             var segment = this.segments[i];
-            if (head.px == segment.px && head.py == segment.py) {
+            if (head.px === segment.px && head.py === segment.py) {
                 return true;
             }
         }
