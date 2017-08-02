@@ -17,8 +17,6 @@ function Game(ctx, canv) {
         var ymax = this.canv.height - this.stepsize;
         this.snake = new Snake(10, 10, 0, 0, xmax, ymax, this.stepsize)
         this.food = this.makeFood();
-        //todo: snake should store this
-        this.shouldGrow = false;
         document.addEventListener("keydown", this.onKeyDown.bind(this));
     }
 
@@ -38,15 +36,13 @@ function Game(ctx, canv) {
         // did snake eat?
         if (this.snake.eat(this.food)) {
             this.food = null;
-            this.shouldGrow = true;
         }
 
         // update positions
         if (!this.food) {
             this.food = this.makeFood(ctx, canv)
         }
-        this.snake.move(this.shouldGrow)
-        this.shouldGrow = false;
+        this.snake.move()
 
         // draw board
         ctx.fillStyle = "black";
@@ -130,9 +126,10 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     };
     this.stepsize = stepsize;
     this.segments = [head];
+    this.shouldGrow = false;
 
     this.move = function(shouldGrow) {
-        if (shouldGrow) {
+        if (this.shouldGrow) {
             this.addSegment();
         }
         this.moveBody();
@@ -143,6 +140,7 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     this.eat = function(food) {
         var head = this.segments[0];
         if (head.px == food.px && head.py == food.py) {
+            this.shouldGrow = true;
             return true;
         } else {
             return false;
@@ -184,6 +182,7 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
             'px': null,
             'py': null
         });
+        this.shouldGrow = false;
     }
 
     this.collide = function() {
