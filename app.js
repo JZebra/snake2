@@ -62,7 +62,6 @@ function Game(ctx, canv) {
         ctx.fillRect(this.food['px'], this.food['py'], foodsize, foodsize)
     }
 
-    // todo: snake should have an api with moveUp(), moveLeft(),. etc
     this.onKeyDown = function(event) {
         //Keyboard codes
         // w == 87
@@ -71,24 +70,16 @@ function Game(ctx, canv) {
         // d == 68
         switch(event.keyCode) {
             case 83:
-                if (this.snake.vy != -1) {
-                    this.snake.vx = 0; this.snake.vy = 1;
-                }
+                this.snake.controlUp();
                 break;
             case 65:
-                if (this.snake.vx != 1) {
-                    this.snake.vx = -1; this.snake.vy = 0;
-                }
+                this.snake.controlLeft();
                 break;
             case 87:
-                if (this.snake.vy != 1) {
-                    this.snake.vx = 0; this.snake.vy = -1;
-                }
+                this.snake.controlDown();
                 break;
             case 68:
-                if (this.snake.vx != -1) {
-                    this.snake.vx = 1; this.snake.vy = 0;
-                }
+                this.snake.controlRight();
                 break;
         }
     }
@@ -194,6 +185,30 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
             }
         }
         return false;
+    }
+
+    this.controlUp = function() {
+        if (this.vy != -1) {
+            this.vx = 0; this.vy = 1;
+        }
+    }
+
+    this.controlLeft = function() {
+        if (this.vx != 1) {
+            this.vx = -1; this.vy = 0;
+        }
+    }
+
+    this.controlDown = function() {
+        if (this.vy != 1) {
+            this.vx = 0; this.vy = -1;
+        }
+    }
+
+    this.controlRight = function() {
+        if (this.vx != -1) {
+            this.vx = 1; this.vy = 0;
+        }
     }
 }
 
