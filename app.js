@@ -15,7 +15,7 @@ function Game(ctx, canv) {
         this.stepsize = 10;
         var xmax = this.canv.width - this.stepsize;
         var ymax = this.canv.height - this.stepsize;
-        this.snake = new Snake(10, 10, 0, 0, xmax, ymax, this.stepsize)
+        this.snake = new Snake(10, 10, 1, 0, xmax, ymax, this.stepsize)
         this.food = this.makeFood();
         document.addEventListener("keydown", this.onKeyDown.bind(this));
     }
@@ -155,9 +155,15 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     this.segments = [head];
     this.shouldGrow = false;
 
+    this.initializeSegments = function() {
+
+    }
+
     this.move = function(shouldGrow) {
         if (this.shouldGrow) {
-            this.addSegment();
+            // moveBody() will handle setting the correct coordinates
+            this.addSegment(null, null);
+            this.shouldGrow = false;
         }
         this.moveBody();
         this.moveHead(this.xmax, this.ymax);
@@ -204,12 +210,11 @@ function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
         }
     }
 
-    this.addSegment = function() {
+    this.addSegment = function(px, py) {
         this.segments.push({
-            'px': null,
-            'py': null
+            'px': px,
+            'py': py
         });
-        this.shouldGrow = false;
     }
 
     this.collide = function() {
