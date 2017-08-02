@@ -1,27 +1,142 @@
 window.onload = function(){
     var canv = document.getElementById("gc");
     var ctx = canv.getContext("2d");
-    document.addEventListener("keydown", keyPush);
-    initGame(ctx, canv)
-    var framerate = 1000/15 // 15 fps
-    setInterval(function() {tick(ctx, canv)}, framerate)
+    var game = new Game(ctx, canv);
+    game.init();
+    game.start();
 }
 
-function Snake(px, py, vx, vy, stepsize) {
+function Game(ctx, canv) {
+    this.ctx = ctx;
+    this.canv = canv;
+
+    this.init = function() {
+        console.log('initializing game');
+        this.stepsize = 10;
+        var xmax = this.canv.width - this.stepsize;
+        var ymax = this.canv.height - this.stepsize;
+        this.snake = new Snake(10, 10, 0, 0, xmax, ymax, this.stepsize)
+        this.food = this.makeFood();
+        //todo: snake should store this
+        this.shouldGrow = false;
+        document.addEventListener("keydown", this.onKeyDown.bind(this));
+    }
+
+    this.start = function() {
+        console.log('starting game');
+        framerate = 1000/15 // 15 fps
+        this.interval = setInterval(this.tick.bind(this), framerate)
+    }
+
+    this.tick = function() {
+        // game ending collision
+        if (this.snake.collide()) {
+            this.gameOver();
+            return
+        }
+
+        // did snake eat?
+        if (this.snake.eat(this.food)) {
+            this.food = null;
+            this.shouldGrow = true;
+        }
+
+        // update positions
+        if (!this.food) {
+            this.food = this.makeFood(ctx, canv)
+        }
+        this.snake.move(this.shouldGrow)
+        this.shouldGrow = false;
+
+        // draw board
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canv.width, canv.height)
+
+        // draw snake
+        const snakesize = 10;
+        ctx.fillStyle = "white";
+        for (var i = 0; i < this.snake.segments.length; i++) {
+            var segment = this.snake.segments[i];
+            ctx.fillRect(segment['px'], segment['py'], snakesize, snakesize)
+        }
+
+        // draw food
+        const foodsize = 10;
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.food['px'], this.food['py'], foodsize, foodsize)
+    }
+
+    // todo: snake should have an api with moveUp(), moveLeft(),. etc
+    this.onKeyDown = function(event) {
+        //Keyboard codes
+        // w == 87
+        // a == 65
+        // s == 83
+        // d == 68
+        switch(event.keyCode) {
+            case 83:
+                if (this.snake.vy != -1) {
+                    this.snake.vx = 0; this.snake.vy = 1;
+                }
+                break;
+            case 65:
+                if (this.snake.vx != 1) {
+                    this.snake.vx = -1; this.snake.vy = 0;
+                }
+                break;
+            case 87:
+                if (this.snake.vy != 1) {
+                    this.snake.vx = 0; this.snake.vy = -1;
+                }
+                break;
+            case 68:
+                if (this.snake.vx != -1) {
+                    this.snake.vx = 1; this.snake.vy = 0;
+                }
+                break;
+        }
+    }
+
+    this.makeFood = function() {
+        // round to the nearest multiple of stepsize
+        let randx = Math.floor(Math.random() * this.canv.width / this.stepsize) * this.stepsize;
+        let randy = Math.floor(Math.random() * this.canv.height / this.stepsize) * this.stepsize;
+        return {
+            'px': randx,
+            'py': randy,
+        }
+    }
+
+    this.stop = function() {
+        clearInterval(this.interval);
+    }
+
+    this.gameOver = function() {
+        alert('Game over')
+        this.stop()
+    }
+
+
+}
+
+function Snake(px, py, vx, vy, xmax, ymax, stepsize) {
     this.vx = vx;
     this.vy = vy;
+    this.xmax = xmax;
+    this.ymax = ymax;
     var head = {
         'px': px,
         'py': py
     };
     this.stepsize = stepsize;
     this.segments = [head];
+
     this.move = function(shouldGrow) {
         if (shouldGrow) {
             this.addSegment();
         }
         this.moveBody();
-        this.moveHead();
+        this.moveHead(this.xmax, this.ymax);
     }
 
     // Returns true if the snake eats the food.
@@ -82,97 +197,4 @@ function Snake(px, py, vx, vy, stepsize) {
         return false;
     }
 }
-
-function initGame(ctx, canv) {
-    stepsize = 10;
-    snake = new Snake(10, 10, 0, 0, stepsize)
-    xmax = canv.width - stepsize;
-    ymax = canv.height - stepsize;
-    food = null;
-    shouldGrow = false;
-    makeFood(ctx, canv);
-}
-
-function keyPush(event) {
-    //Keyboard codes
-    // w == 87
-    // a == 65
-    // s == 83
-    // d == 68
-    switch(event.keyCode) {
-        case 83:
-            if (snake.vy != -1) {
-                snake.vx = 0; snake.vy = 1;
-            }
-            break;
-        case 65:
-            if (snake.vx != 1) {
-                snake.vx = -1; snake.vy = 0;
-            }
-            break;
-        case 87:
-            if (snake.vy != 1) {
-                snake.vx = 0; snake.vy = -1;
-            }
-            break;
-        case 68:
-            if (snake.vx != -1) {
-                snake.vx = 1; snake.vy = 0;
-            }
-            break;
-    }
-}
-
-function tick(ctx, canv) {
-    // game ending collision
-    if (snake.collide()) {
-        showGameOver();
-        return
-    }
-
-    // did snake eat?
-    if (snake.eat(food)) {
-        food = null;
-        shouldGrow = true;
-    }
-
-    // update positions
-    if (!food) {
-        makeFood(ctx, canv)
-    }
-    snake.move(shouldGrow)
-    shouldGrow = false;
-
-    // draw board
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canv.width, canv.height)
-
-    // draw snake
-    const snakesize = 10;
-    ctx.fillStyle = "white";
-    for (var i = 0; i < snake.segments.length; i++) {
-        var segment = snake.segments[i];
-        ctx.fillRect(segment['px'], segment['py'], snakesize, snakesize)
-    }
-
-    // draw food
-    const foodsize = 10;
-    ctx.fillStyle = "red";
-    ctx.fillRect(food['px'], food['py'], foodsize, foodsize)
-}
-
-function makeFood(ctx, canv) {
-    // round to the nearest multiple of stepsize
-    let randx = Math.floor(Math.random() * canv.width / stepsize) * stepsize;
-    let randy = Math.floor(Math.random() * canv.height / stepsize) * stepsize;
-    food = {
-        'px': randx,
-        'py': randy,
-    }
-}
-
-function showGameOver() {
-    alert('Game over')
-}
-
 
